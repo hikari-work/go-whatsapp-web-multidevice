@@ -1,21 +1,21 @@
 FROM aldinokemal2104/go-whatsapp-web-multidevice:latest
 
 WORKDIR /app
-# Cloud Run butuh folder ini ada
 RUN mkdir -p /app/storages
 
-# PENTING: Set Environment Variable Default
-ENV PORT=8080
+# Set Default Env
 ENV WA_AUTH="test:test"
 ENV WA_WEBHOOK="http://35.240.163.9:5000/v2/whatsapp"
 ENV WA_DEBUG="true"
+# Cloud Run injects PORT, but we set default just in case
+ENV PORT=8080 
 
-EXPOSE 8080
+# Copy script wrapper yang baru kita buat
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
-# === PERBAIKAN UTAMA ===
-# 1. Kita WAJIB mereset ENTRYPOINT dari image asli agar bisa pakai shell custom
+# Reset Entrypoint bawaan image
 ENTRYPOINT []
 
-# 2. Gunakan /bin/sh -c secara eksplisit
-# Perhatikan tanda petik dua (") agar variable $PORT terbaca sebagai angka 8080
-CMD ["/bin/sh", "-c", "./main rest --port=$PORT --basic-auth=$WA_AUTH --debug=$WA_DEBUG --os=Chrome --account-validation=false --webhook=$WA_WEBHOOK"]
+# Jalankan script wrapper
+CMD ["/app/start.sh"]
